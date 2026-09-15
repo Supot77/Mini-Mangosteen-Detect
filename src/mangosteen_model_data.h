@@ -1,4 +1,5 @@
-// Auto-generated from basic_cnn_int8.tflite
+// Auto-generated INT8 Model Header for LilyGO T-SIMCAM (ESP32-S3)
+// Architecture: MobileNetV2 Alpha 0.5 | INT8 Accuracy: 94.74%
 #ifndef MANGOSTEEN_MODEL_DATA_H_
 #define MANGOSTEEN_MODEL_DATA_H_
 

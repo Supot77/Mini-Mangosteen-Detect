@@ -33,18 +33,13 @@
 
 ```text
 Mini-Mangosteen-Detect/
-├── models/                               # โฟลเดอร์รวมโมเดลบีบอัด TFLite INT8
-│   ├── mobilenet_v2_alpha35_int8.tflite  # ⭐ โมเดลหลักความแม่นยำสูง (Default, ~627 KB)
-│   ├── mobilenet_v2_alpha025_int8.tflite # โมเดลทางเลือกขนาดกะทัดรัด (~622 KB)
-│   ├── basic_cnn_int8.tflite             # โมเดลขนาดเล็กพิเศษ (~31 KB)
-│   ├── models_tflite_int8.zip            # ไฟล์ Zip รวมโมเดลบีบอัดทั้งหมด
-│   └── README.md                         # เอกสารอธิบายโมเดลและ Input/Output Specs
+├── models/                               # จุดวางโมเดล TFLite INT8 สำหรับ setup.py
+│   └── README.md                         # ข้อกำหนด Input/Output ของโมเดล
 ├── src/
 │   ├── main.cpp                          # ซอร์สโค้ดเฟิร์มแวร์หลัก (กล้อง, AI, SoftAP, Web Server)
 │   ├── mangosteen_model_data.h           # Header ข้อมูลโมเดล
 │   └── mangosteen_model_data.cc          # ข้อมูลโมเดล C Byte Array (alignas 16)
 ├── platformio.ini                        # ไฟล์ตั้งค่า PlatformIO สำหรับ ESP32-S3
-├── sdkconfig.defaults                    # ค่าคอนฟิกเริ่มต้น ESP-IDF / FreeRTOS
 ├── setup.py                              # สคริปต์ติดตั้ง แปลงโมเดล และแฟลชอัตโนมัติ
 ├── setup.bat                             # ตัวเรียกติดตั้งอัตโนมัติสำหรับ Windows (1-Click)
 ├── convert_tflite_to_c.py                # เครื่องมือแปลงโมเดล TFLite เป็น C++ array
@@ -52,6 +47,12 @@ Mini-Mangosteen-Detect/
 ├── run_viewer.bat                        # รันโปรแกรม Python GUI บน Windows
 ├── requirements.txt                      # รายการไลบรารี Python ที่ต้องใช้
 ├── class_names.json                      # ลำดับคลาสผลลัพธ์ (overripe, ripe, unripe)
+├── training/                             # Dataset, notebooks, models และผลการทดลอง
+│   ├── train_edge_model.py               # Local training + INT8 quantization
+│   ├── augment_and_save_dataset.py       # สร้างภาพ augmentation ลง dataset
+│   └── Mangosteen_EdgeAI/                # ชุดข้อมูลและ artifacts ของการทดลอง
+├── archive/                              # snapshot และไฟล์สำรอง ไม่ใช่ runtime path
+│   └── esp-idf-legacy/                   # เส้นทาง ESP-IDF รุ่นเก่า ไม่ใช่ build หลัก
 ├── TRAINING_GUIDE.md                     # คู่มือการเทรนโมเดลและ Quantize บน Colab ฉบับสมบูรณ์
 ├── SETUP_GUIDE.md                        # คู่มือการติดตั้งและแฟลชลงบอร์ดอย่างละเอียด
 └── README.md                             # เอกสารแนะนำโปรเจกต์ฉบับนี้

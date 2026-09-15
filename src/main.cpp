@@ -113,9 +113,19 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
     .badge.ripe { color: #fff; background: var(--ripe); }
     .badge.unripe { color: #000; background: var(--unripe); }
     .badge.overripe { color: #fff; background: var(--overripe); }
+    .badge.thinking { color: #fff; background: #6366f1; animation: pulse 0.8s infinite alternate; }
+    @keyframes pulse { from { opacity: 0.6; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
     .conf-text { font-size: 1.25rem; font-weight: bold; color: var(--primary); }
     .bar-bg { width: 100%; height: 10px; background: #334155; border-radius: 6px; overflow: hidden; margin-bottom: 12px; }
     .bar-fill { height: 100%; width: 0%; background: var(--primary); transition: width 0.3s ease; }
+    .delay-box { display: flex; gap: 8px; margin-bottom: 12px; }
+    .delay-chip { flex: 1; background: #0f172a; border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; }
+    .delay-chip.highlight { border-color: rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.08); }
+    .delay-icon { font-size: 1.2rem; }
+    .delay-info { display: flex; flex-direction: column; }
+    .delay-title { font-size: 0.68rem; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.4px; }
+    .delay-num { font-size: 0.95rem; font-weight: bold; color: var(--text); font-family: monospace; margin-top: 1px; }
+    .delay-chip.highlight .delay-num { color: var(--primary); }
     .details { font-size: 0.82rem; color: var(--subtext); display: flex; flex-direction: column; gap: 4px; font-family: monospace; }
     .footer { margin-top: 16px; font-size: 0.75rem; color: #64748b; text-align: center; }
   </style>
@@ -154,8 +164,24 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
       <div class="bar-bg">
         <div class="bar-fill" id="bar-fill"></div>
       </div>
+      <div class="delay-box">
+        <div class="delay-chip">
+          <span class="delay-icon">🧠</span>
+          <div class="delay-info">
+            <span class="delay-title">เวลาคิดของโมเดล</span>
+            <span class="delay-num" id="val-model-delay">-- ms</span>
+          </div>
+        </div>
+        <div class="delay-chip highlight">
+          <span class="delay-icon">⏱️</span>
+          <div class="delay-info">
+            <span class="delay-title">Delay รวม (ถ่าย ➔ ผล)</span>
+            <span class="delay-num" id="val-total-delay">-- ms</span>
+          </div>
+        </div>
+      </div>
       <div class="details">
-        <div id="lbl-latency">⏱️ Inference: -- ms | Stream: -- FPS</div>
+        <div id="lbl-latency">⏱️ คิดบนบอร์ด: -- ms | รวม: -- ms | Stream: -- FPS</div>
         <div id="lbl-dist">📊 overripe: 0% | ripe: 0% | unripe: 0%</div>
       </div>
     </div>
@@ -176,6 +202,8 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
     const barFill = document.getElementById('bar-fill');
     const lblLatency = document.getElementById('lbl-latency');
     const lblDist = document.getElementById('lbl-dist');
+    const valModelDelay = document.getElementById('val-model-delay');
+    const valTotalDelay = document.getElementById('val-total-delay');
 
     let isStreaming = true;
     let isPaused = false;
@@ -183,7 +211,8 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
     let lastFpsTime = Date.now();
     let currentFps = "0";
 
-    async function fetchFrame(predict = 0) {
+    async function fetchFrame(predict = 0, clickStartTime = null) {
+      const reqStart = clickStartTime || performance.now();
       try {
         const url = `/snapshot?predict=${predict}&t=${Date.now()}`;
         const res = await fetch(url);
@@ -200,6 +229,8 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
           ctx.drawImage(img, 0, 0, 240, 240);
           URL.revokeObjectURL(img.src);
 
+          const totalDelay = Math.round(performance.now() - reqStart);
+
           fpsCount++;
           const now = Date.now();
           if (now - lastFpsTime >= 1000) {
@@ -209,7 +240,12 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
           }
 
           if (predict === 1 || chkAuto.checked) {
-            updateUI(predClass, conf, latency, scores);
+            updateUI(predClass, conf, latency, totalDelay, scores);
+            if (isPaused) {
+              btnAction.disabled = false;
+              btnAction.textContent = "🔄 กลับไปดูภาพสด (Live Preview)";
+              btnAction.className = "btn-resume";
+            }
           } else {
             lblLatency.textContent = `⏱️ Stream: ${currentFps} FPS | 240x240 คมชัด`;
           }
@@ -221,19 +257,26 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
         };
         img.src = URL.createObjectURL(blob);
       } catch (err) {
+        if (isPaused) {
+          btnAction.disabled = false;
+          btnAction.textContent = "📸 ลองใหม่อีกครั้ง";
+          lblClass.textContent = "[ ถ่ายภาพไม่สำเร็จ ]";
+        }
         if (isStreaming && !isPaused) {
           setTimeout(() => fetchFrame(chkAuto.checked ? 1 : 0), 500);
         }
       }
     }
 
-    function updateUI(cls, conf, latency, scores) {
+    function updateUI(cls, conf, latency, totalDelay, scores) {
       if (!cls) return;
       lblClass.textContent = `🎯 ${cls.toUpperCase()}`;
       lblClass.className = `badge ${cls}`;
       lblConf.textContent = `${conf.toFixed(1)}%`;
       barFill.style.width = `${conf}%`;
-      lblLatency.textContent = `⏱️ Inference: ${latency.toFixed(1)} ms | Stream: ${currentFps} FPS`;
+      if (valModelDelay) valModelDelay.textContent = `${latency.toFixed(1)} ms`;
+      if (valTotalDelay) valTotalDelay.textContent = `${totalDelay} ms (${(totalDelay/1000).toFixed(2)}s)`;
+      lblLatency.textContent = `⏱️ คิดโมเดล: ${latency.toFixed(1)} ms | รวม: ${totalDelay} ms | Stream: ${currentFps} FPS`;
       if (scores.length === 3) {
         lblDist.textContent = `📊 overripe: ${scores[0]}% | ripe: ${scores[1]}% | unripe: ${scores[2]}%`;
       }
@@ -244,10 +287,16 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
 
       if (!isPaused) {
         isPaused = true;
-        btnAction.textContent = "🔄 กลับไปดูภาพสด (Live Preview)";
-        btnAction.className = "btn-resume";
+        btnAction.disabled = true;
+        btnAction.textContent = "⏳ กำลังถ่ายภาพ & คิดผลลัพธ์...";
         reticle.style.display = "none";
-        fetchFrame(1);
+        lblClass.textContent = "🧠 บอร์ดกำลังคิด...";
+        lblClass.className = "badge thinking";
+        lblConf.textContent = "--%";
+        barFill.style.width = "0%";
+        if (valModelDelay) valModelDelay.textContent = "กำลังคิด...";
+        if (valTotalDelay) valTotalDelay.textContent = "กำลังจับเวลา...";
+        fetchFrame(1, performance.now());
       } else {
         isPaused = false;
         btnAction.textContent = "📸 ถ่ายภาพ & Predict";
@@ -257,6 +306,8 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
         lblClass.className = "badge";
         lblConf.textContent = "--%";
         barFill.style.width = "0%";
+        if (valModelDelay) valModelDelay.textContent = "-- ms";
+        if (valTotalDelay) valTotalDelay.textContent = "-- ms";
         fetchFrame(0);
       }
     }
@@ -400,7 +451,9 @@ void handleSnapshot() {
         return;
     }
 
+    int64_t t_board_start = esp_timer_get_time();
     float latency_ms = 0.0f;
+    float board_delay_ms = 0.0f;
     int best_class = 0;
     float max_score = -1.0f;
     float scores[3] = {0};
@@ -444,6 +497,10 @@ void handleSnapshot() {
                 }
             }
         }
+
+        board_delay_ms = (float)(esp_timer_get_time() - t_board_start) / 1000.0f;
+        Serial.printf("[AI] Predicted: %s (%.1f%%) | Model Thinking: %.1f ms | Total Board Time: %.1f ms\r\n",
+                      kClassNames[best_class], max_score * 100.0f, latency_ms, board_delay_ms);
     }
 
     // Convert 240x240 RGB565 to sharp JPEG
@@ -458,10 +515,11 @@ void handleSnapshot() {
     }
 
     server.sendHeader("Access-Control-Allow-Origin", "*");
-    server.sendHeader("Access-Control-Expose-Headers", "X-Prediction, X-Confidence, X-Latency, X-Scores");
+    server.sendHeader("Access-Control-Expose-Headers", "X-Prediction, X-Confidence, X-Latency, X-Board-Delay, X-Scores");
     server.sendHeader("X-Prediction", kClassNames[best_class]);
     server.sendHeader("X-Confidence", String(max_score * 100.0f, 1));
     server.sendHeader("X-Latency", String(latency_ms, 1));
+    server.sendHeader("X-Board-Delay", String(board_delay_ms, 1));
     server.sendHeader("X-Scores", String(scores[0] * 100.0f, 1) + "," + String(scores[1] * 100.0f, 1) + "," + String(scores[2] * 100.0f, 1));
 
     server.setContentLength(jpg_len);

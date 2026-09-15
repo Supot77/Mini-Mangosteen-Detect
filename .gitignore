@@ -26,6 +26,9 @@ Thumbs.db
 Mangosteen_EdgeAI/
 Mangosteen_EdgeAI-20260914T064122Z-1-001/
 Mangosteen_EdgeAI-20260914T064122Z-1-001.zip
+training/Mangosteen_EdgeAI/
+archive/Mangosteen_EdgeAI-20260914T064122Z-1-001/
+archive/Mangosteen_EdgeAI-20260914T064122Z-1-001.zip
 *.keras
 *.h5
 *.tar.gz

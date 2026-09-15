@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Automated Terminal Setup Script for Mangosteen Edge AI (ESP32-S3)
-Can be run from project root or inside setup/ folder:
+Run from the project root:
     python setup.py
     python setup.py --port COM7
     python setup.py --model models/basic_cnn_int8.tflite

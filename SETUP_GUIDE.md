@@ -50,7 +50,6 @@ Mini-Mangosteen-Detect/
 │   ├── mangosteen_model_data.h           # Header ข้อมูลโมเดล
 │   └── mangosteen_model_data.cc          # ข้อมูลโมเดล C Byte Array (alignas 16)
 ├── platformio.ini                        # ไฟล์ตั้งค่าบอร์ดและไลบรารี
-├── sdkconfig.defaults                    # ค่าคอนฟิกเริ่มต้น ESP-IDF
 ├── setup.py                              # สคริปต์เซ็ตอัพอัตโนมัติผ่าน Terminal
 ├── setup.bat                             # ตัวเปิดเซ็ตอัพอัตโนมัติสำหรับ Windows (1-Click)
 ├── convert_tflite_to_c.py                # สคริปต์แปลงไฟล์ .tflite เป็น C++ array
@@ -58,6 +57,9 @@ Mini-Mangosteen-Detect/
 ├── run_viewer.bat                        # ตัวเรียกเปิดโปรแกรม Python สะดวกด้วยการดับเบิลคลิก
 ├── requirements.txt                      # รายการไลบรารี Python
 ├── class_names.json                      # รายชื่อคลาส (overripe, ripe, unripe)
+├── training/                             # Dataset, notebooks, models และผลการทดลอง
+├── archive/                              # snapshot และไฟล์สำรอง
+│   └── esp-idf-legacy/                   # เส้นทาง ESP-IDF รุ่นเก่า
 ├── TRAINING_GUIDE.md                     # คู่มือการเทรนโมเดลและ Quantize บน Colab ฉบับสมบูรณ์
 ├── SETUP_GUIDE.md                        # คู่มือฉบับนี้
 └── README.md                             # เอกสารแนะนำโปรเจกต์
