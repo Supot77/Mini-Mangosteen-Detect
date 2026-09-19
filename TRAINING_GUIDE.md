@@ -1,224 +1,68 @@
-# 🧠 คู่มือการเทรนโมเดล AI และส่งออกเป็น TFLite INT8 (Training Guide)
-**ระบบจำแนกระดับความสุกของมังคุดสำหรับรันบนชิป ESP32-S3 (TensorFlow Lite Micro)**
+# Training guide: Separable CNN 64
 
-คู่มือนี้อธิบายขั้นตอนการเตรียมชุดข้อมูล (Dataset), การสร้างและเทรนโมเดล Deep Learning บน **Google Colab (GPU ฟรี)**, การแปลงเป็นโมเดลบีบอัด **Full INT8 Quantization**, จนถึงการนำไฟล์โมเดลมาใส่ในโปรเจกต์เพื่อแฟลชลงบอร์ด ESP32-S3
+โมเดลที่ใช้งานปัจจุบันคือ **Separable CNN 64** ซึ่งมี 61,059 parameters จึงผ่านเกณฑ์ไม่เกิน 100,000 parameters มี validation accuracy **91.18% (31/34)** และมี primary original-crop offline accuracy **94.74% (36/38)** ทั้ง Float32 และ Full INT8 พร้อม balanced accuracy **96.30%** และ macro F1 **0.905**
 
----
+ค่า 94.74% เป็นผลจากการใช้ crop แบบเดิมกับภาพ test ที่กันไว้และไม่ผ่าน augmentation ส่วน deployment-matched crop check ได้ 100.00% (38/38) ทั้ง Float32 และ Full INT8 ซึ่งเป็นเพียง secondary preprocessing check ผลทั้งสองแบบยังไม่ใช่ตัวเลขยืนยัน accuracy จากภาพกล้อง OV2640 บนบอร์ดจริง
 
-## 📋 สเปกโมเดลสำหรับ ESP32-S3 (Model Specifications)
+## Local
 
-เพื่อให้โมเดลสามารถทำงานร่วมกับเฟิร์มแวร์ในบอร์ดนี้ได้ 100% โปรดตั้งค่าโมเดลตามนี้:
-- **ขนาดภาพขาเข้า (Input Shape):** `96 × 96 × 3` (RGB พิกเซล)
-- **การแปลงข้อมูลขาเข้า (Input Normalization):** ค่า `int8` ในช่วง `[-128, 127]`
-- **สถาปัตยกรรมที่แนะนำ:** **MobileNetV2** ($\alpha = 0.35$) หรือ **Custom Basic CNN**
-- **คลาสผลลัพธ์ (3 คลาส เรียงตามตัวอักษร):**
-  - Index `0`: **`overripe`** (มังคุดสุกเกิน / เนื้อแก้ว / ดำคล้ำ)
-  - Index `1`: **`ripe`** (มังคุดสุกพอดีกิน / เลือดดำ / ม่วงแดง)
-  - Index `2`: **`unripe`** (มังคุดดิบ / ด่าง / สายเลือด)
+ติดตั้ง dependencies ของงานฝึกโมเดล แล้วรันจาก project root:
 
----
+```powershell
+python -m pip install tensorflow scikit-learn matplotlib pillow
+python training/small_model_experiment.py --mode full
+```
 
-## 📁 ขั้นตอนที่ 1: การจัดเตรียมชุดข้อมูล (Dataset Preparation)
-
-จัดระเบียบโฟลเดอร์ภาพมังคุดของคุณตามโครงสร้างมาตรฐานของ Keras ดังนี้:
+ผลลัพธ์ใหม่จะถูกบันทึกใน:
 
 ```text
-dataset/
-├── train/
-│   ├── overripe/    # ภาพมังคุดสุกงอม / เปลือกดำเข้ม
-│   ├── ripe/        # ภาพมังคุดสุกพอดีกิน / เปลือกม่วงแดง
-│   └── unripe/      # ภาพมังคุดดิบ / เปลือกเขียวหรือมีสายเลือดแดง
-├── val/
-│   ├── overripe/
-│   ├── ripe/
-│   └── unripe/
-└── test/
-    ├── overripe/
-    ├── ripe/
-    └── unripe/
+training/Mangosteen_EdgeAI/04_results/experiments/<timestamp>/
 ```
 
-> 💡 **ข้อแนะนำในการถ่ายภาพ:**
-> - ควรถ่ายภาพผลมังคุดในมุมมองหลากหลาย (ด้านบนขั้ว, ด้านข้าง, ด้านก้น)
-> - ถ่ายในสภาพแสงธรรมชาติและแสงหลอดไฟ เพื่อให้โมเดลทนทานต่อสภาพแวดล้อม
-> - สัดส่วนการแบ่งข้อมูลแนะนำ: Train 70%, Validation 15%, Test 15%
+ทุก run จะมี `run.log`, `events.jsonl`, `summary.json`, model summary, training history, classification report และ TFLite artifact
 
----
+## Local training panel
 
-## 🚀 ขั้นตอนที่ 2: โค้ดเทรนโมเดลบน Google Colab (ครบทุกขั้นตอน)
+ถ้าต้องการนั่งกดบนเครื่องเอง ให้ดับเบิลคลิก [training/start_local_training_panel.bat](training/start_local_training_panel.bat) แล้วกดตามลำดับ:
 
-เปิด [Google Colab](https://colab.research.google.com/) แล้วเปลี่ยน Runtime เป็น **GPU** (เมนู `Runtime` -> `Change runtime type` -> `T4 GPU`) จากนั้นรันโค้ดตามลำดับ:
+1. **แยก Camera-Matched Dataset** — ใช้ภาพต้นฉบับในโปรเจกต์และ label/split เดิม โดยจำลอง `RGB565 240x240 -> 96x96`
+2. **เริ่มเทรน Separable CNN 64** — ใช้ dataset ที่เพิ่งสร้างด้วย `raw_camera_robust` augmentation
 
-### 2.1 ติดตั้งไลบรารีและโหลดชุดข้อมูล
-```python
-import os
-import tensorflow as tf
-from tensorflow.keras import layers, models
-import numpy as np
+หน้าต่างจะแสดง log แบบต่อเนื่อง และสร้าง output แบบ timestamped โดยไม่เขียนทับ dataset เดิมหรือใช้ภาพจากภายนอก
 
-IMG_SIZE = (96, 96)
-BATCH_SIZE = 16
-SEED = 42
+## Google Colab
 
-# แก้ path ให้ตรงกับโฟลเดอร์ dataset ของคุณ
-DATASET_PATH = "/content/dataset"
+เปิดไฟล์ [training/Mangosteen_Training_SeparableCNN64.ipynb](training/Mangosteen_Training_SeparableCNN64.ipynb) (หรือ [Mangosteen_Training_SeparableCNN64.ipynb](Mangosteen_Training_SeparableCNN64.ipynb)) บน [Google Colab](https://colab.research.google.com/) โดยมีปุ่ม **Open in Colab** พร้อมรันได้ทันที
 
-train_ds = tf.keras.utils.image_dataset_from_directory(
-    f"{DATASET_PATH}/train",
-    image_size=IMG_SIZE,
-    batch_size=BATCH_SIZE,
-    label_mode="int",
-    shuffle=True,
-    seed=SEED
-)
+ไฟล์ Notebook บรรจุขั้นตอนการเทรน **Separable CNN 64** ฉบับสมบูรณ์:
+1. **Clone & Setup Environment** — ดึง Repository จาก GitHub พร้อมตรวจสอบ GPU
+2. **Dataset Inspection & Loading** — โหลดชุดข้อมูลและแสดงรูปตัวอย่าง
+3. **Build Separable CNN 64** — โครงสร้าง Depthwise-Separable CNN 61,059 parameters (< 100k)
+4. **Data Augmentation & Balance** — In-Memory Oversampling และ Camera-Robust Augmentation
+5. **Two-Stage Training** — Head Training (lr=1e-3) + Fine-Tuning (lr=3.5e-5)
+6. **Evaluation & Visualization** — กราฟการฝึกสอน, Classification Report, Confusion Matrix
+7. **Full INT8 Quantization** — แปลงเป็น TFLite INT8 (~100.5 KiB) และทดสอบความแม่นยำเทียบ Float32
+8. **Export C/C++ Array** — แปลงโมเดลเป็น `mangosteen_model_data.{h,cc}` สำหรับ ESP32-S3
+9. **Download Artifacts** — รวมไฟล์และกดดาวน์โหลดลงเครื่องเพื่อนำไป Build ใน PlatformIO ได้ทันที
 
-val_ds = tf.keras.utils.image_dataset_from_directory(
-    f"{DATASET_PATH}/val",
-    image_size=IMG_SIZE,
-    batch_size=BATCH_SIZE,
-    label_mode="int",
-    shuffle=False
-)
+## การเลือกไฟล์ไป deploy
 
-class_names = train_ds.class_names
-print("Classes:", class_names)  # ควรได้ ['overripe', 'ripe', 'unripe']
+หลังตรวจผลแล้ว ให้ใช้ไฟล์:
+
+```text
+current_model/model/separable_cnn_64_int8.tflite
 ```
 
----
+หรือคัดลอกไปที่:
 
-### 2.2 การทำ Data Augmentation เพื่อเพิ่มความหลากหลาย
-```python
-data_augmentation = tf.keras.Sequential([
-    layers.RandomFlip("horizontal_and_vertical"),
-    layers.RandomRotation(0.2),
-    layers.RandomBrightness(0.2),
-    layers.RandomContrast(0.2),
-], name="data_augmentation")
+```text
+current_model/model/separable_cnn_64_int8.tflite
 ```
 
----
+จากนั้น `python setup.py` จะใช้โมเดลนี้เป็นค่าเริ่มต้น แปลงเป็น `src/mangosteen_model_data.{h,cc}` และเรียก PlatformIO สำหรับ build/upload
 
-### 2.3 สร้างโมเดล MobileNetV2 ($\alpha=0.35$)
-```python
-ALPHA = 0.35
+## สรุปผลล่าสุด
 
-base_model = tf.keras.applications.MobileNetV2(
-    input_shape=(96, 96, 3),
-    alpha=ALPHA,
-    include_top=False,
-    weights="imagenet"
-)
-base_model.trainable = False  # Freeze น้ำหนักเดิมในรอบแรก
+ดูตารางและขอบเขตหลักฐานได้ที่ [RESULT_SUMMARY.md](current_model/results/20260917_001333/RESULT_SUMMARY.md)
 
-inputs = layers.Input(shape=(96, 96, 3), name="input_layer")
-x = data_augmentation(inputs)
-x = tf.keras.applications.mobilenet_v2.preprocess_input(x)
-x = base_model(x, training=False)
-x = layers.GlobalAveragePooling2D()(x)
-x = layers.Dropout(0.3)(x)
-outputs = layers.Dense(3, activation="softmax", name="output_layer")(x)
-
-model = models.Model(inputs, outputs, name="Mangosteen_MobileNetV2")
-model.summary()
-```
-
----
-
-### 2.4 ฝึกสอนโมเดล (Phase 1: Transfer Learning + Phase 2: Fine-Tuning)
-```python
-# --- Phase 1: เทรนเฉพาะ Classification Head ---
-model.compile(
-    optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3),
-    loss="sparse_categorical_crossentropy",
-    metrics=["accuracy"]
-)
-
-model.fit(train_ds, validation_data=val_ds, epochs=25)
-
-# --- Phase 2: ปลดล็อค 20 เลเยอร์สุดท้ายเพื่อ Fine-Tune ---
-base_model.trainable = True
-for layer in base_model.layers[:-20]:
-    layer.trainable = False
-
-model.compile(
-    optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
-    loss="sparse_categorical_crossentropy",
-    metrics=["accuracy"]
-)
-
-model.fit(train_ds, validation_data=val_ds, epochs=20)
-```
-
----
-
-### 2.5 การแปลงโมเดลเป็น Full INT8 Quantization (ขั้นตอนสำคัญสำหรับ ESP32)
-เพื่อให้โมเดลมีขนาดเล็ก (~600 KB) และทำงานได้อย่างรวดเร็วบน ESP32-S3 ต้องบีบอัดเป็น **Full INT8**:
-
-```python
-# 1. แยกเฉพาะโครงข่ายสำหรับ Inference (ตัด Data Augmentation ออก)
-inference_inputs = layers.Input(shape=(96, 96, 3), name="input_layer")
-x = tf.keras.applications.mobilenet_v2.preprocess_input(inference_inputs)
-x = model.get_layer(base_model.name)(x, training=False)
-x = model.get_layer("global_average_pooling2d")(x)
-x = model.get_layer("dropout")(x)
-inference_outputs = model.get_layer("output_layer")(x)
-
-export_model = models.Model(inference_inputs, inference_outputs, name="Export_MobileNetV2")
-
-# 2. ฟังก์ชัน Representative Dataset สำหรับคำนวณ Scaling Factors
-def representative_data_gen():
-    for images, _ in train_ds.take(30):
-        for img in images:
-            yield [tf.expand_dims(img, 0)]
-
-# 3. ตั้งค่า TFLite Converter เป็น Full Integer Quantization (INT8)
-converter = tf.lite.TFLiteConverter.from_keras_model(export_model)
-converter.optimizations = [tf.lite.Optimize.DEFAULT]
-converter.representative_dataset = representative_data_gen
-converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
-converter.inference_input_type = tf.int8
-converter.inference_output_type = tf.int8
-
-# 4. ทำการแปลงและบันทึกไฟล์
-tflite_model_int8 = converter.convert()
-
-output_filename = "mobilenet_v2_alpha35_int8.tflite"
-with open(output_filename, "wb") as f:
-    f.write(tflite_model_int8)
-
-import os
-file_size_kb = os.path.getsize(output_filename) / 1024
-print(f"🎉 แปลงโมเดลสำเร็จ! ขนาดไฟล์: {file_size_kb:.2f} KB")
-```
-
----
-
-### 2.6 ดาวน์โหลดไฟล์โมเดล `.tflite`
-รันคำสั่งดาวน์โหลดไฟล์จาก Colab ลงเครื่องของคุณ:
-```python
-from google.colab import files
-files.download(output_filename)
-```
-
----
-
-## 📥 ขั้นตอนที่ 3: นำโมเดลมาใส่ในโปรเจกต์และแฟลชลงบอร์ด
-
-1. **นำไฟล์โมเดล `.tflite` ที่ดาวน์โหลดมา:**  
-   วางไว้ในโฟลเดอร์ `models/` ของโปรเจกต์นี้ เช่น:
-   ```text
-   Mini-Mangosteen-Detect/
-   └── models/
-       └── mobilenet_v2_alpha35_int8.tflite   <-- วางไฟล์ที่นี่
-   ```
-2. **เสียบสายบอร์ด LilyGO T-SIMCAM เข้ากับคอมพิวเตอร์**
-3. **รันคำสั่งติดตั้งอัตโนมัติ:**
-   - **บน Windows:** ดับเบิลคลิกไฟล์ **`setup.bat`** ได้ทันที
-   - **บน Terminal:**
-     ```bash
-     python setup.py
-     ```
-   *(สคริปต์จะค้นหาไฟล์โมเดลใน `models/` แปลงเป็น C++ Array และแฟลชลงชิป ESP32-S3 ให้อัตโนมัติทันที)*
-4. **เปิดดูผลงาน:**
-   - ต่อ Wi-Fi บอร์ด: `Mangosteen-AI` (รหัส `12345678`)
-   - เปิด Browser ไปที่ `http://192.168.4.1` เพื่อทดสอบโมเดลของคุณได้ทันที!
+โมเดล MobileNetV2 และคู่มือเดิมถูกเก็บไว้ที่ `archive/mobilenet_v2_legacy/` เพื่ออ้างอิงย้อนหลังเท่านั้น
