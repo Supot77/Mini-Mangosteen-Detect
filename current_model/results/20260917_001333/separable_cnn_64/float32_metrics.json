@@ -1,0 +1,43 @@
+{
+  "evaluation_scope": "deployment-matched crop check; secondary offline engineering check",
+  "accuracy": 1.0,
+  "primary_original_crop_accuracy": 0.9473684210526315,
+  "primary_original_crop_balanced_accuracy": 0.962962962962963,
+  "primary_original_crop_macro_f1": 0.904716481187069,
+  "balanced_accuracy": 1.0,
+  "correct": 38,
+  "total": 38,
+  "classification_report": {
+    "overripe": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 2.0
+    },
+    "ripe": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 18.0
+    },
+    "unripe": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 18.0
+    },
+    "accuracy": 1.0,
+    "macro avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 38.0
+    },
+    "weighted avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 38.0
+    }
+  }
+}

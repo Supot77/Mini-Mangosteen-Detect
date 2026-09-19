@@ -1,0 +1,51 @@
+{
+  "name": "separable_cnn_64",
+  "family": "depthwise-separable CNN",
+  "input_shape": [
+    null,
+    96,
+    96,
+    3
+  ],
+  "estimated_parameters": 61059,
+  "parameter_limit": 100000,
+  "under_limit": true,
+  "blocks": [
+    {
+      "filters": 32,
+      "stride": 2
+    },
+    {
+      "filters": 32,
+      "stride": 1
+    },
+    {
+      "filters": 64,
+      "stride": 2
+    },
+    {
+      "filters": 64,
+      "stride": 1
+    },
+    {
+      "filters": 96,
+      "stride": 2
+    },
+    {
+      "filters": 96,
+      "stride": 1
+    },
+    {
+      "filters": 128,
+      "stride": 2
+    },
+    {
+      "filters": 128,
+      "stride": 1
+    }
+  ],
+  "raw_float32_parameter_bytes": 244236,
+  "raw_int8_weight_bytes_approx": 61059,
+  "actual_parameters": 61059,
+  "actual_matches_estimate": true
+}

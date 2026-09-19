@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1280 720" role="img" aria-labelledby="separable-cnn-64-title separable-cnn-64-desc" xmlns="http://www.w3.org/2000/svg">
+        <title id="separable-cnn-64-title">Separable CNN 64 model architecture</title>
+        <desc id="separable-cnn-64-desc">A left-to-right model diagram showing INT8 input, convolutional feature extraction stages with 32, 64, 96, and 128 channels, global pooling, and three-class output.</desc>
+        <defs>
+          <marker id="sc64-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#4f7188"/>
+          </marker>
+          <marker id="sc64-arrow-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#2f78b7"/>
+          </marker>
+          <style>
+            .sc64-zone { fill: rgba(47,120,183,.035); stroke: rgba(47,120,183,.22); stroke-width: 1; }
+            .sc64-zone-label { fill: #4f7188; font: 600 12px 'Cascadia Mono', 'Consolas', monospace; letter-spacing: .14em; }
+            .sc64-card { fill: #fff; stroke: #9bc7e5; stroke-width: 1.2; }
+            .sc64-card-blue { fill: #f4faff; stroke: #6ca9d4; stroke-width: 1.2; }
+            .sc64-card-output { fill: #fff2e8; stroke: #e88945; stroke-width: 1.2; }
+            .sc64-tag { fill: #eaf4fb; stroke: #9bc7e5; stroke-width: .8; }
+            .sc64-tag-text { fill: #205b8d; font: 600 10px 'Cascadia Mono', 'Consolas', monospace; letter-spacing: .08em; }
+            .sc64-name { fill: #183247; font: 600 16px 'Aptos', 'Segoe UI', sans-serif; }
+            .sc64-sub { fill: #4f7188; font: 12px 'Cascadia Mono', 'Consolas', monospace; }
+            .sc64-small { fill: #7e9aae; font: 12px 'Aptos', 'Segoe UI', sans-serif; }
+            .sc64-arrow { fill: none; stroke: #4f7188; stroke-width: 1.6; marker-end: url(#sc64-arrow); }
+            .sc64-arrow-blue { fill: none; stroke: #2f78b7; stroke-width: 1.8; marker-end: url(#sc64-arrow-blue); }
+            .sc64-arrow-label-mask { fill: #f8fbfe; }
+            .sc64-arrow-label { fill: #4f7188; font: 12px 'Cascadia Mono', 'Consolas', monospace; letter-spacing: .04em; }
+            .sc64-number { fill: #2f78b7; font: 600 14px 'Cascadia Mono', 'Consolas', monospace; }
+            .sc64-output-number { fill: #bd6426; font: 600 14px 'Cascadia Mono', 'Consolas', monospace; }
+          </style>
+        </defs>
+
+        <rect x="0" y="0" width="1280" height="720" fill="#f8fbfe"/>
+        <text x="48" y="48" fill="#2f78b7" font-family="'Cascadia Mono', 'Consolas', monospace" font-size="12" font-weight="600" letter-spacing="2">SEPARABLE CNN · FULL INT8</text>
+        <text x="48" y="84" fill="#183247" font-family="Georgia, serif" font-size="40">Model architecture</text>
+        <text x="48" y="108" fill="#4f7188" font-family="'Cascadia Mono', 'Consolas', monospace" font-size="12">61,059 parameters · 94.74% primary original-crop accuracy · 102,912 bytes</text>
+        <rect x="1032" y="44" width="200" height="48" rx="6" fill="#eaf4fb" stroke="#9bc7e5"/>
+        <text x="1132" y="65" text-anchor="middle" fill="#205b8d" font-family="'Cascadia Mono', 'Consolas', monospace" font-size="12" font-weight="600">PARAMETER GATE</text>
+        <text x="1132" y="82" text-anchor="middle" fill="#2f78b7" font-family="'Cascadia Mono', 'Consolas', monospace" font-size="14" font-weight="600">61,059 / 100,000</text>
+
+        <!-- Zones -->
+        <rect class="sc64-zone" x="48" y="136" width="228" height="408" rx="8"/>
+        <rect class="sc64-zone" x="304" y="136" width="568" height="408" rx="8"/>
+        <rect class="sc64-zone" x="900" y="136" width="160" height="408" rx="8"/>
+        <rect class="sc64-zone" x="1088" y="136" width="144" height="408" rx="8"/>
+        <text class="sc64-zone-label" x="72" y="164">INPUT</text>
+        <text class="sc64-zone-label" x="328" y="164">FEATURE EXTRACTION</text>
+        <text class="sc64-zone-label" x="924" y="164">HEAD</text>
+        <text class="sc64-zone-label" x="1112" y="164">OUTPUT</text>
+
+        <!-- Connectors, drawn before cards -->
+        <path class="sc64-arrow-blue" d="M252 300 H292 Q304 300 304 288 V208 Q304 196 316 196 H344"/>
+        <path class="sc64-arrow" d="M588 240 V260"/>
+        <path class="sc64-arrow" d="M588 324 V344"/>
+        <path class="sc64-arrow" d="M588 408 V428"/>
+        <path class="sc64-arrow-blue" d="M832 460 H884 Q900 460 900 444 V324 H920"/>
+        <path class="sc64-arrow-blue" d="M1040 324 H1100"/>
+        <rect class="sc64-arrow-label-mask" x="270" y="244" width="66" height="16" rx="2"/>
+        <text class="sc64-arrow-label" x="303" y="256" text-anchor="middle">INT8</text>
+
+        <!-- Input card -->
+        <rect class="sc64-card-blue" x="72" y="224" width="180" height="152" rx="6"/>
+        <rect class="sc64-tag" x="88" y="240" width="64" height="20" rx="2"/>
+        <text class="sc64-tag-text" x="120" y="254" text-anchor="middle">INPUT</text>
+        <text class="sc64-name" x="88" y="288">Input + Rescaling</text>
+        <text class="sc64-sub" x="88" y="316">96 × 96 × 3 RGB</text>
+        <text class="sc64-sub" x="88" y="336">INT8 [−128, 127]</text>
+        <text class="sc64-small" x="88" y="360">0 parameters</text>
+
+        <!-- Feature cards -->
+        <rect class="sc64-card" x="344" y="176" width="488" height="64" rx="6"/>
+        <text class="sc64-number" x="364" y="202">01</text>
+        <text class="sc64-name" x="404" y="202">Stem Conv2D + BatchNorm + ReLU</text>
+        <text class="sc64-sub" x="404" y="224">3×3 / stride 2 → 48 × 48 × 32 · 864 + 128 params</text>
+
+        <rect class="sc64-card-blue" x="344" y="260" width="488" height="64" rx="6"/>
+        <text class="sc64-number" x="364" y="286">02</text>
+        <text class="sc64-name" x="404" y="286">Separable blocks · 32 channels</text>
+        <text class="sc64-sub" x="404" y="308">SepConv 01–02 → 24 × 24 × 32 · 1,312 + 1,312 params</text>
+
+        <rect class="sc64-card" x="344" y="344" width="488" height="64" rx="6"/>
+        <text class="sc64-number" x="364" y="370">03</text>
+        <text class="sc64-name" x="404" y="370">Separable blocks · 64 channels</text>
+        <text class="sc64-sub" x="404" y="392">SepConv 03–04 → 12 × 12 × 64 · 2,336 + 4,672 params</text>
+
+        <rect class="sc64-card-blue" x="344" y="428" width="488" height="64" rx="6"/>
+        <text class="sc64-number" x="364" y="454">04</text>
+        <text class="sc64-name" x="404" y="454">Separable blocks · 96 → 128 channels</text>
+        <text class="sc64-sub" x="404" y="476">6 × 6 × 96 → 3 × 3 × 128 · 6,720 + 10,080 + 13,152 + 17,536</text>
+
+        <!-- Head -->
+        <rect class="sc64-card" x="920" y="244" width="120" height="160" rx="6"/>
+        <rect class="sc64-tag" x="936" y="260" width="48" height="20" rx="2"/>
+        <text class="sc64-tag-text" x="960" y="274" text-anchor="middle">HEAD</text>
+        <text class="sc64-name" x="936" y="308">GAP</text>
+        <text class="sc64-sub" x="936" y="330">128</text>
+        <text class="sc64-name" x="936" y="364">Dropout</text>
+        <text class="sc64-sub" x="936" y="386">rate 0.20</text>
+
+        <!-- Output -->
+        <rect class="sc64-card-output" x="1100" y="244" width="120" height="160" rx="6"/>
+        <rect x="1116" y="260" width="64" height="20" rx="2" fill="#ffe4d0" stroke="#e88945" stroke-width=".8"/>
+        <text x="1148" y="274" text-anchor="middle" fill="#bd6426" font-family="'Cascadia Mono', 'Consolas', monospace" font-size="10" font-weight="600" letter-spacing=".08em">OUTPUT</text>
+        <text class="sc64-name" x="1116" y="308">Dense</text>
+        <text class="sc64-sub" x="1116" y="330">3 units</text>
+        <text class="sc64-output-number" x="1116" y="356">387 params</text>
+        <text class="sc64-small" x="1116" y="380">Softmax</text>
+
+        <!-- Footer summary -->
+        <line x1="48" y1="588" x2="1232" y2="588" stroke="rgba(44,105,145,.18)" stroke-width="1"/>
+        <text x="48" y="620" fill="#4f7188" font-family="'Cascadia Mono', 'Consolas', monospace" font-size="12" font-weight="600" letter-spacing="1.4">RESULT</text>
+        <text x="48" y="650" fill="#183247" font-family="'Aptos', 'Segoe UI', sans-serif" font-size="16" font-weight="600">Float32 = Full INT8: 94.74% original-crop · 100.00% matched-crop check</text>
+        <text x="760" y="620" fill="#4f7188" font-family="'Cascadia Mono', 'Consolas', monospace" font-size="12" font-weight="600" letter-spacing="1.4">CLASSES</text>
+        <text x="760" y="650" fill="#183247" font-family="'Cascadia Mono', 'Consolas', monospace" font-size="14">overripe · ripe · unripe</text>
+        <text x="48" y="692" fill="#7e9aae" font-family="'Cascadia Mono', 'Consolas', monospace" font-size="10">SOURCE: separable_cnn_64 · INPUT 96×96 RGB · DEPLOYMENT: ESP32-S3 / TFLM</text>
+      </svg>

@@ -1,0 +1,114 @@
+{
+  "variant": "separable_cnn_64",
+  "parameters": 61059,
+  "under_parameter_limit": true,
+  "evaluation_scope": "deployment-matched crop check; secondary offline engineering check",
+  "primary_original_crop_evaluation": {
+    "accuracy": 0.9473684210526315,
+    "balanced_accuracy": 0.962962962962963,
+    "macro_f1": 0.904716481187069,
+    "correct": 36,
+    "total": 38,
+    "dataset": "current_model/evaluation/original_crop_test"
+  },
+  "float32": {
+    "accuracy": 1.0,
+    "balanced_accuracy": 1.0,
+    "correct": 38,
+    "total": 38,
+    "classification_report": {
+      "overripe": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 2.0
+      },
+      "ripe": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 18.0
+      },
+      "unripe": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 18.0
+      },
+      "accuracy": 1.0,
+      "macro avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 38.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 38.0
+      }
+    }
+  },
+  "int8": {
+    "accuracy": 1.0,
+    "balanced_accuracy": 1.0,
+    "correct": 38,
+    "total": 38,
+    "file_bytes": 102912,
+    "file_kib": 100.5,
+    "file_mib": 0.09814453125,
+    "input_quantization": {
+      "scale": 1.0,
+      "zero_point": -128
+    },
+    "output_quantization": {
+      "scale": 0.00390625,
+      "zero_point": -128
+    },
+    "input_shape": [
+      1,
+      96,
+      96,
+      3
+    ],
+    "output_shape": [
+      1,
+      3
+    ],
+    "tflite_path": "D:\\MiniProject mangosteen\\current_model\\results\\20260917_001333\\separable_cnn_64\\separable_cnn_64_int8.tflite",
+    "classification_report": {
+      "overripe": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 2.0
+      },
+      "ripe": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 18.0
+      },
+      "unripe": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 18.0
+      },
+      "accuracy": 1.0,
+      "macro avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 38.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 38.0
+      }
+    }
+  }
+}

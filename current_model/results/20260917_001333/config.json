@@ -1,0 +1,14 @@
+{
+  "mode": "train",
+  "edge_root": "D:\\MiniProject mangosteen\\training\\Mangosteen_EdgeAI",
+  "variants": [
+    "separable_cnn_64"
+  ],
+  "head_epochs": 20,
+  "fine_tune_epochs": 25,
+  "batch_size": 16,
+  "augmentation_profile": "camera_robust",
+  "dataset_root": "D:\\MiniProject mangosteen\\current_model\\dataset_deployment_matched_v4",
+  "class_weight_profile": "legacy",
+  "seed": 42
+}

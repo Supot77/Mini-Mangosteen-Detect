@@ -1,0 +1,34 @@
+{
+  "labels": [
+    "overripe",
+    "ripe",
+    "unripe"
+  ],
+  "matrix": [
+    [
+      2,
+      0,
+      0
+    ],
+    [
+      1,
+      16,
+      1
+    ],
+    [
+      0,
+      0,
+      18
+    ]
+  ],
+  "correct": 36,
+  "total": 38,
+  "accuracy": 0.9473684210526315,
+  "evaluation_scope": "original 96x96 crop robustness test",
+  "source_dataset": "D:\\MiniProject mangosteen\\current_model\\evaluation\\original_crop_test",
+  "matched_crop_check": {
+    "correct": 38,
+    "total": 38,
+    "accuracy": 1.0
+  }
+}

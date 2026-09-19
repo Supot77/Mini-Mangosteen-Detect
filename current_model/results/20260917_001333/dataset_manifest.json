@@ -1,0 +1,23 @@
+{
+  "root": "D:\\MiniProject mangosteen\\current_model\\dataset_deployment_matched_v4",
+  "splits": {
+    "train": {
+      "overripe": 56,
+      "ripe": 80,
+      "unripe": 78,
+      "total": 214
+    },
+    "val": {
+      "overripe": 1,
+      "ripe": 17,
+      "unripe": 16,
+      "total": 34
+    },
+    "test": {
+      "overripe": 2,
+      "ripe": 18,
+      "unripe": 18,
+      "total": 38
+    }
+  }
+}
